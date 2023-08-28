@@ -1,16 +1,23 @@
-const inputEl = document.querySelector('input');
-const buttonEl = document.querySelector('button');
-const containerEl = document.querySelector('#result-container');
+const inputEl = <HTMLInputElement>document.querySelector('input');
+const buttonEl = <HTMLButtonElement>document.querySelector('button');
+const containerEl = <HTMLDivElement>document.querySelector('#result-container');
 
-const students = [
-    {name: 'ajay', age: 10},
-    {name: 'roopa', age: 12},
-    {name: 'judith', age: 11}
-];
+type StudentResponse = {
+    total_count:number;
+    incomplete_results: boolean;
+    items: Student[]
+}
 
-const renderList = (data) => {
+type Student = {
+    login:string;
+    id:number;
+    url:string;
+}
+
+
+const renderList = (data: Student[]) => {
   const liHtml = data
-                  .map(student => `<li>${student.name}</li>`)
+                  .map(student => `<li>${student.login}</li>`)
                   .join('');
 
   containerEl.innerHTML = `<ul>
@@ -19,14 +26,8 @@ const renderList = (data) => {
 }
 
 buttonEl.addEventListener('click', () => {
-  const searchValue = inputEl.value.toLowerCase();
-  const filteredStudents = students
-                            .filter(student => student.name
-                                                      .toLowerCase()
-                                                      .includes(searchValue)
-                              );
-
-  renderList(filteredStudents);
+  const searchValue : string = inputEl.value.toLowerCase();
+  fetch(`https://api.github.com/search/users?q=${searchValue}`)
+    .then(res => res.json())
+    .then((result: StudentResponse) => renderList(result.items))
 });
-
-renderList(students);
